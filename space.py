@@ -95,10 +95,21 @@ def add_enemy(enemy) :
         xenemy = 0
     return enemy_more_rect
 
+def check_enemy_value_life(enemy):
+    value_enemy = 0
+    for y in range(len(enemy)):
+        for x in range(len(enemy[y])):
+            if (enemy[y][x] != None):
+                value_enemy += 1
+    if value_enemy > 0:
+        return True
+    else:
+        return False
+
 #------------Стрельба врагов.
 def shoot_enemy(bullet_enemy_array,pic_bullet,enemy):
-    Random = True
-    while Random:        
+    Random = check_enemy_value_life(enemy)
+    while Random:
         value_nubmer_y = random.randint(0,len(enemy)-1)
         value_nubmer_x = random.randint(0,len(enemy[value_nubmer_y])-1)
 
@@ -115,6 +126,7 @@ def shoot_enemy(bullet_enemy_array,pic_bullet,enemy):
                 if not Random :
                     bullet_enemy_array.append(pic_bullet.get_rect(topleft = (enemy[value_nubmer_y][value_nubmer_x].x,enemy[value_nubmer_y][value_nubmer_x].y)))
                     return bullet_enemy_array
+    return bullet_enemy_array
 #---
 
 
@@ -133,7 +145,96 @@ def draw_live(value,font,surface,x,y):
     surface.blit(textobj, textrect)  # Отображаем текст на экране
 
 
-def win():
+def game_over(score):
+    running = True
+    mouse_pos = 0
+    text_surface_game = FONT_MAIN_MENU.render("Начать заново", True, WHITE)
+    text_rect_game = text_surface_game.get_rect(center=(SIZEX / 2, SIZEY / 2))
+    text_surface_exit = FONT_MAIN_MENU.render("Выход", True, WHITE)
+    text_rect_exit = text_surface_exit.get_rect(center=(SIZEX / 2, SIZEY / 2+200))
+    while running:
+        SCREEN.fill(BLACK)
+        SCREEN.blit(text_surface_game, text_rect_game)
+        SCREEN.blit(text_surface_exit, text_rect_exit)
+        draw_text("Вы проиграли", FONT_MAIN_MENU, SCREEN, SIZEX/2-120, 100,RED)
+        draw_live(score,FONT_GAME,SCREEN,SIZEX - 100,SIZEY - SIZEY + 20)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Нажатие Enter для начала игры
+                    return "play"
+                if event.key == pygame.K_ESCAPE:  # Нажатие Escape для выхода
+                    pygame.quit()
+                    sys.exit()
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_buttons = pygame.mouse.get_pressed()
+
+            if text_rect_game.collidepoint(mouse_pos):  # Проверяем, попала ли мышь в текст
+                text_surface_game = FONT_MAIN_MENU.render("Начать Заново", True, RED)
+                if mouse_buttons[0] and text_rect_game.collidepoint(mouse_pos):
+                    return "play"
+            else:
+                text_surface_game = FONT_MAIN_MENU.render("Начать Заново", True, WHITE)
+
+            if text_rect_exit.collidepoint(mouse_pos):  # Проверяем, попала ли мышь в текст
+                text_surface_exit = FONT_MAIN_MENU.render("Выход", True, RED)
+                if mouse_buttons[0] and text_rect_exit.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+            else:
+                text_surface_exit = FONT_MAIN_MENU.render("Выход", True, WHITE)
+
+
+        pygame.display.flip()
+
+def win(score):
+    running = True
+    mouse_pos = 0
+    text_surface_game = FONT_MAIN_MENU.render("Начать заново", True, WHITE)
+    text_rect_game = text_surface_game.get_rect(center=(SIZEX / 2, SIZEY / 2))
+    text_surface_exit = FONT_MAIN_MENU.render("Выход", True, WHITE)
+    text_rect_exit = text_surface_exit.get_rect(center=(SIZEX / 2, SIZEY / 2+200))
+    while running:
+        SCREEN.fill(BLACK)
+        SCREEN.blit(text_surface_game, text_rect_game)
+        SCREEN.blit(text_surface_exit, text_rect_exit)
+        draw_live(score,FONT_GAME,SCREEN,SIZEX - 100,SIZEY - SIZEY + 20)
+        draw_text("Вы победили!", FONT_MAIN_MENU, SCREEN, SIZEX/2-120, 100,RED)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Нажатие Enter для начала игры
+                    return "play"
+                if event.key == pygame.K_ESCAPE:  # Нажатие Escape для выхода
+                    pygame.quit()
+                    sys.exit()
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_buttons = pygame.mouse.get_pressed()
+
+            if text_rect_game.collidepoint(mouse_pos):  # Проверяем, попала ли мышь в текст
+                text_surface_game = FONT_MAIN_MENU.render("Начать Заново", True, RED)
+                if mouse_buttons[0] and text_rect_game.collidepoint(mouse_pos):
+                    return "play"
+            else:
+                text_surface_game = FONT_MAIN_MENU.render("Начать Заново", True, WHITE)
+
+            if text_rect_exit.collidepoint(mouse_pos):  # Проверяем, попала ли мышь в текст
+                text_surface_exit = FONT_MAIN_MENU.render("Выход", True, RED)
+                if mouse_buttons[0] and text_rect_exit.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+            else:
+                text_surface_exit = FONT_MAIN_MENU.render("Выход", True, WHITE)
+
+
+        pygame.display.flip()
+
+def play():
 
     clock = pygame.time.Clock()
     pygame.display.set_caption("space invaders")
@@ -214,6 +315,9 @@ def win():
 
             #------Массив передвижение снарядов врагов и проверка на попадание.И так же удаление
             bullet_enemy_pos =[]
+            if check_enemy_value_life(enemy_more_rect) is not True:
+                return "win",score
+                # main_menu()
             if bullet_enemy_rect is not None: 
                 for bullet_en in bullet_enemy_rect.copy():
                     bullet_en.y += SPEED_BULLET_ENEMY
@@ -258,7 +362,8 @@ def win():
             bullets_rect = bullets_rect_positive
 
             if live <= 0:
-                main_menu()
+                return "lose",score
+                # main_menu()
 
 
             #-----Проверка на нахождение врагов
@@ -276,7 +381,7 @@ def win():
             #---- Ограничение кадров.
             clock.tick(30)
             # ----
-
+    
 
 def main_menu():
     running = True
@@ -286,7 +391,6 @@ def main_menu():
     text_surface_exit = FONT_MAIN_MENU.render("Выход", True, WHITE)
     text_rect_exit = text_surface_exit.get_rect(center=(SIZEX / 2, SIZEY / 2+200))
     while running:
-        
         SCREEN.fill(BLACK)
         SCREEN.blit(text_surface_game, text_rect_game)
         SCREEN.blit(text_surface_exit, text_rect_exit)
@@ -298,7 +402,9 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:  # Нажатие Enter для начала игры
-                    win()
+                    # running = False
+                    # play()
+                    return "play"
                 if event.key == pygame.K_ESCAPE:  # Нажатие Escape для выхода
                     pygame.quit()
                     sys.exit()
@@ -308,7 +414,8 @@ def main_menu():
             if text_rect_game.collidepoint(mouse_pos):  # Проверяем, попала ли мышь в текст
                 text_surface_game = FONT_MAIN_MENU.render("Начать игру", True, RED)
                 if mouse_buttons[0] and text_rect_game.collidepoint(mouse_pos):
-                    win()
+                    running = False
+                    return "play"
             else:
                 text_surface_game = FONT_MAIN_MENU.render("Начать игру", True, WHITE)
 
@@ -323,5 +430,19 @@ def main_menu():
 
         pygame.display.flip()
 
+def game_change():
+    game_state = "main_menu"
+    score = 0
+    while True:
+        if game_state == "main_menu":
+            game_state = main_menu()
+        elif game_state == "play":
+            game_state, score = play()
+        elif game_state == "win":
+            game_state = win(score)
+        elif game_state == "lose":
+            game_state = game_over(score)
+    
+
 if __name__ == '__main__':
-    main_menu()
+    game_change()
