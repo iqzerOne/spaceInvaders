@@ -6,6 +6,9 @@ from enemy import *
 from player import *
 from screens import *
 
+def next_level():
+    pass
+
 def play():
     clock = pygame.time.Clock()
     pygame.display.flip()
@@ -15,6 +18,9 @@ def play():
     boolean_T_R_F_L = True
     k_fire = False
     bullet_enemy= []
+    level = 1
+    time_shoot_enemy = TIME_SHOOT_ENEMY
+    last_shoot = 0
     live = LIVE
     score = SCORE
     start_time = pygame.time.get_ticks()
@@ -57,12 +63,22 @@ def play():
             if live <= 0:
                 return "lose",score
             if value_enemy == 0:
-                return "win",score
+                if level >= 2:
+                    return "win",score
+                level += 1
+                del bullets_player[:]
+                del bullet_enemy [:]
+                time_shoot_enemy = 700
+                enemy_rect = add_enemy()
             #------Изменение координат игрока
             player.move(direction)
             #------Добавление снаряда игрока если переменная равна Пробелу.
-            if k_fire == K_SPACE:
-                bullets_player.append(player.shooting())
+            if current_time - last_shoot >= player.cooldown_shoot:
+                if k_fire == K_SPACE:
+                    bullets_player.append(player.shooting())
+                    k_fire = False
+                    last_shoot = current_time
+            else:
                 k_fire = False
                         
             bullets_player,score = bullet_player(bullets_player,enemy_rect,score)
@@ -74,7 +90,7 @@ def play():
 
             boolean_T_R_F_L = border_check(enemy_rect,boolean_T_R_F_L)
             # ----Переодичность стрельбы врагов
-            if current_time - start_time > TIME_SHOOT_ENEMY:
+            if current_time - start_time > time_shoot_enemy:
                 value_nubmer_y,value_nubmer_x = random_enemy(enemy_rect)
                 bullet_enemy.append(enemy_rect[value_nubmer_y][value_nubmer_x].shooting())
                 start_time = pygame.time.get_ticks()

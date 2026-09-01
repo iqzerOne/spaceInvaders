@@ -10,6 +10,7 @@ class Player:
         self.image = pygame.image.load('images/weapon1.png').convert_alpha()
         self.player = pygame.transform.scale(self.image, (SIZE_PLAYER_X, SIZE_PLAYER_Y))
         self.rect = self.player.get_rect(topleft = (self.x, self.y))
+        self.cooldown_shoot = 1000
 
     def move(self,direction):
         if direction:
