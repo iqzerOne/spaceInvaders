@@ -3,7 +3,7 @@
 ## Как запустить
 ```bash
 pip install pygame
-python space.py
+python main.py
 ```
 ## Управление
 1. Стрелки влево/вправо
